@@ -1,0 +1,30 @@
+#ifndef LINKEDSTACK_HPP
+#define LINKEDSTACK_HPP
+
+class Node {
+public:
+    Node *next;
+    Node(int value) : _value{value} {}
+    int get_value();
+
+private:
+    int _value;
+};
+
+class LinkedStack {
+    int _capacity;
+
+public:
+    LinkedStack(int capacity = (int)1e6) : _capacity{capacity} {}
+
+    void push(int x);
+    int pop();
+    int size();
+    bool empty();
+
+private:
+    int current = 0;
+    Node* head = nullptr;
+};
+
+#endif

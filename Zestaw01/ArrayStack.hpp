@@ -4,7 +4,7 @@
 class ArrayStack {
     int _capacity;
 public:
-    ArrayStack(int capacity = (int)1e6) : _capacity{capacity} {} // zapytac czemu erroruje
+    ArrayStack(int capacity = (int)1e6) : _capacity{capacity} {}
     ~ArrayStack() { delete[] stack; }
 
     void push(int x);

@@ -4,6 +4,15 @@
 
 int Node::get_value() { return _value; }
 
+LinkedStack::~LinkedStack() {
+    while (head->next) {
+        Node *temp = head;
+        head = temp->next;
+        delete temp;
+    }
+    delete head;
+}
+
 bool LinkedStack::empty() { return current == 0; }
 
 int LinkedStack::size() { return current; }

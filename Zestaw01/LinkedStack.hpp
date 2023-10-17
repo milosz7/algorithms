@@ -16,6 +16,7 @@ class LinkedStack {
 
 public:
     LinkedStack(int capacity = (int)1e6) : _capacity{capacity} {}
+    ~LinkedStack();
 
     void push(int x);
     int pop();

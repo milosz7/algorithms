@@ -3,14 +3,8 @@ CXXFLAGS := -Wall -Wextra -O3 -pedantic
 LDFLAGS :=
 
 HEADERS := $(wildcard *.hpp)
-NAMES := $(patsubst %.cpp,%,$(wildcard *.cpp))
-OBJS := $(patsubst %,%.o,$(NAMES))
 TAR_FNAME := Milosz_Bargiel_Zestaw01.tar.gz
-TO_COMPRESS := $(wildcard *.*)
-
-EX_4_FILENAME := Generator.cpp
-EX_5_FILENAME := ONP.cpp
-
+TO_COMPRESS := $(filter-out $(wildcard *.[o|x]), $(wildcard *.*))
 
 .PHONY: all clean tar
 all: Stack.x Generator.x ONP.x
@@ -21,13 +15,11 @@ all: Stack.x Generator.x ONP.x
 %.x: %.o
 	$(CXX) $(LDFLAGS) -o $@ $^
 
-Generator.x: Generator.o $(HEADERS)
+Generator.x: Generator.o
 
 Stack.x: ArrayStack.o LinkedStack.o $(HEADERS) 
 
 ONP.x: $(HEADERS)
-
-main.x: main.o LinkedStack.o TemplateStack.o LinkedStack.hpp TemplateStack.hpp
 
 clean:
 	$(RM) $(wildcard *.[o|x])

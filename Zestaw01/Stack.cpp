@@ -39,4 +39,5 @@ int main() {
             stack.push(to_push);
         }
     }
+    return 0;
 }

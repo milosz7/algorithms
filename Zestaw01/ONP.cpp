@@ -51,6 +51,8 @@ int main() {
         std::cout << current;
         print_space(stack.empty());
     };
+
+    return 0;
 }
 
 static bool is_digit(std::string input) {

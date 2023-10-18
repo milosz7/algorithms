@@ -3,7 +3,7 @@
 
 class Node {
 public:
-    Node *next;
+    Node *next = nullptr;
     Node(int value) : _value{value} {}
     int _value;
 };

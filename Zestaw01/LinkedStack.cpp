@@ -3,12 +3,11 @@
 #include <iostream>
 
 LinkedStack::~LinkedStack() {
-    while (head->next) {
-        Node *temp = head;
-        head = temp->next;
-        delete temp;
+    while( head != nullptr ) {
+        Node* next = head->next;
+        delete head;
+        head = next;
     }
-    delete head;
 }
 
 bool LinkedStack::empty() { return current == 0; }

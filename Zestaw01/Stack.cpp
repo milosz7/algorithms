@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "LinkedStack.hpp"
+#include "ArrayStack.hpp"
 
 #define POP_OPERATION 'D'
 #define SIZE_OPERATION 'S'
@@ -15,7 +16,9 @@ int main() {
     std::string line;
     // initialising stack with capacity of n_operations because
     // there is a chance that all operations will be push operations
+    // uncomment the preferred stack implementation
     LinkedStack stack = LinkedStack(n_operations);
+    // ArrayStack stack = ArrayStack(n_operations);
 
     for (int i = 0; i < n_operations; i++) {
 

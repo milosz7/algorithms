@@ -5,9 +5,6 @@ class Node {
 public:
     Node *next;
     Node(int value) : _value{value} {}
-    int get_value();
-
-private:
     int _value;
 };
 

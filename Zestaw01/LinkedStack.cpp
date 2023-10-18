@@ -2,8 +2,6 @@
 #include <stdexcept>
 #include <iostream>
 
-int Node::get_value() { return _value; }
-
 LinkedStack::~LinkedStack() {
     while (head->next) {
         Node *temp = head;
@@ -38,7 +36,7 @@ int LinkedStack::pop() {
     
     current--;
     Node *to_pop = head;
-    int value = to_pop->get_value();
+    int value = to_pop->_value;
 
     if (current == 0) {
         head = nullptr;

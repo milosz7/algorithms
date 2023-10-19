@@ -21,8 +21,6 @@ Queue.x: $(HEADERS)
 
 Radix.x: Radix.o $(HEADERS)
 
-main.x: main.o ArrayQueue.o ArrayQueue.hpp
-
 clean:
 	$(RM) $(wildcard *.[o|x])
 

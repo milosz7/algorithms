@@ -40,7 +40,7 @@ static int get_digit(int number, int index) {
     return (int)(number / pow(10, index)) % 10;
 }
 
-// Uncomment the preferred queue implementation
+// uncomment the preferred queue implementation
 static void radix(std::vector<int> &vec) {
     int vec_size = vec.size();
     ArrayQueue<int>** queues = new ArrayQueue<int>*[N_QUEUES];
@@ -63,7 +63,7 @@ static void radix(std::vector<int> &vec) {
         }
 
         int it = 0;
-        
+
         for (int l = 0; l < N_QUEUES; l++) {
             while(!queues[l]->empty()) {
                 int popped = queues[l]->pop();

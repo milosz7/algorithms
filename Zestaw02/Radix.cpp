@@ -76,5 +76,5 @@ static void radix(std::vector<int> &vec) {
     for (int m = 0; m < N_QUEUES; ++m) {
         delete queues[m];
     }
-    delete queues;
+    delete[] queues;
 }

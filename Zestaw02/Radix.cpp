@@ -77,4 +77,5 @@ static void radix(std::vector<int> &vec) {
         delete queues[m];
     }
     delete queues;
+    return 0;
 }

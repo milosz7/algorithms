@@ -4,7 +4,7 @@ LDFLAGS :=
 
 HEADERS := $(wildcard *.hpp)
 TAR_FNAME := Milosz_Bargiel_Zestaw01.tar.gz
-TO_COMPRESS := $(filter-out $(wildcard *.[o|x]), $(wildcard *.*))
+TO_COMPRESS := $(filter-out $(wildcard *.[o|x]), $(wildcard *))
 
 .PHONY: all clean tar
 all: Stack.x Generator.x ONP.x

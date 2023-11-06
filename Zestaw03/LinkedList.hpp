@@ -1,21 +1,23 @@
 #ifndef LINKED_LIST_H
 #define LINKED_LIST_H
 #include <stdexcept>
-#include <iostream>
 
 template <class T>
 class LinkedList {
     public:
     struct Node {
-        Node *next = nullptr;
-        Node *prev = nullptr;
+        Node *prev;
+        Node *next;
         T value;
+        Node(Node *_prev, Node *_next, T _value) : prev{_prev}, next{_next}, value{_value} {} 
+        Node() : prev{nullptr}, next{nullptr} {}
     };
     
     Node *indirect; 
     int _size = 0;
 
     LinkedList();
+    ~LinkedList();
     void push_front(T x);
     int pop_front();
     void push_back(T x);
@@ -45,12 +47,15 @@ LinkedList<T>::LinkedList() {
 }
 
 template <class T>
+LinkedList<T>::~LinkedList() {
+    clear();
+    delete indirect;
+}
+
+template <class T>
 void LinkedList<T>::push_front(T x) {
-    Node *to_insert = new Node();
-    to_insert->value = x;
     Node *head = indirect->next;
-    to_insert->next = head;
-    to_insert->prev = indirect;
+    Node *to_insert = new Node(indirect, head, x);
     head->prev = to_insert;
     indirect->next = to_insert;
     _size++;
@@ -71,11 +76,8 @@ int LinkedList<T>::pop_front() {
 
 template <class T>
 void LinkedList<T>::push_back(T x) {
-    Node *to_insert = new Node();
-    to_insert->value = x;
     Node *tail = indirect->prev;
-    to_insert->next = indirect;
-    to_insert->prev = tail;
+    Node *to_insert = new Node(tail, indirect, x);
     tail->next = to_insert;
     indirect->prev = to_insert;
     _size++;
@@ -145,11 +147,8 @@ void LinkedList<T>::insert(int i, T x) {
     for (int it = 0; it < i; it++) {
         walk = walk->next;
     }
-    Node *to_insert = new Node();
-    to_insert->value = x;
+    Node *to_insert = new Node(walk->prev, walk, x);
     walk->prev->next = to_insert;
-    to_insert->prev = walk->prev;
-    to_insert->next = walk;
     walk->prev = to_insert;
     _size++;
 }

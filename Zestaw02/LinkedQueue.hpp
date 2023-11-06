@@ -18,8 +18,7 @@ class LinkedQueue {
 public:
     LinkedQueue(int capacity = (int)1e6) : _capacity{capacity} {}
     ~LinkedQueue();
-    template<class U>
-    void push(U&& x);
+    void push(T x);
     T pop();
     int size();
     bool empty();
@@ -41,12 +40,11 @@ LinkedQueue<T>::~LinkedQueue() {
 }
 
 template <class T>
-template <class U>
-void LinkedQueue<T>::push(U &&x) {
+void LinkedQueue<T>::push(T x) {
     if (n_elements == _capacity)
         throw std::out_of_range("Stack is full!");
     
-    Node<T> *new_node = new Node<T>(std::forward<U>(x));
+    Node<T> *new_node = new Node<T>(x);
     if (head == nullptr) {
         head = tail = new_node;
     } else {

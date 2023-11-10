@@ -26,7 +26,7 @@ class LinkedList {
     bool empty();
     void clear();
     int find(T x);
-    int erase(int i);
+    T erase(int i);
     void insert(int i, T x);
     int remove(T x);
     bool replace(T oldv, T newv);    
@@ -113,7 +113,7 @@ template <class T>
 int LinkedList<T>::find(T x) {
     Node *walk = indirect->next;
     int index = 0;
-    while(walk != indirect) {
+    while (walk != indirect) {
         if (walk->value == x)
             return index;
         index++;
@@ -123,10 +123,10 @@ int LinkedList<T>::find(T x) {
 }
 
 template <class T>
-int LinkedList<T>::erase(int i) {
+T LinkedList<T>::erase(int i) {
     if (empty())
         throw std::out_of_range("List is empty!");
-    if(i > _size - 1)
+    if (i > _size - 1)
         throw std::out_of_range("The index is out of bounds!");
     Node *walk = indirect->next;
     for (int it = 0; it < i; it++) {
@@ -141,7 +141,7 @@ int LinkedList<T>::erase(int i) {
 
 template <class T>
 void LinkedList<T>::insert(int i, T x) {
-    if(i > _size - 1)
+    if (i > _size - 1)
         throw std::out_of_range("The index is out of bounds!");
     Node *walk = indirect->next;
     for (int it = 0; it < i; it++) {

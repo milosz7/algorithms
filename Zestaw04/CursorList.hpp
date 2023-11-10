@@ -1,8 +1,6 @@
 #ifndef CURSOR_LIST_H
 #define CURSOR_LIST_H
 #include <stdexcept>
-#include <iostream>
-#include "stdlib.h"
 
 template <class T>
 class CursorList {
@@ -27,9 +25,6 @@ class CursorList {
     int remove(T x);
     int allocate();
     void deallocate(int idx);
-    void printfree();
-    void printlist();
-
 
     private:
     int _capacity;
@@ -86,10 +81,12 @@ void CursorList<T>::push_back(T x) {
     int idx = allocate();
     nodes[idx].value = x;
     nodes[idx].next = -1;
-    nodes[tail].next = idx;
-    tail = idx;
-    if (empty())
-        head = tail;
+    if (empty()) {
+        head = tail = idx;
+    } else {
+        nodes[tail].next = idx;
+        tail = idx;
+    }
     _size++;
 }
 
@@ -98,7 +95,7 @@ T CursorList<T>::pop_back() {
     if (empty())
         throw std::out_of_range("List is empty!");
     T to_pop = nodes[tail].value;
-    Node current_node = nodes[head];
+    Node *current = &nodes[head];
     _size--;
 
     if (empty()) {
@@ -113,12 +110,11 @@ T CursorList<T>::pop_back() {
         return to_pop;
     }
         
-    while (nodes[current_node.next].next != tail) {
-        current_node = nodes[current_node.next];
-        if (current_node.next == -1) break;
+    while (nodes[current->next].next != tail) {
+        current = &nodes[current->next];
     }
     deallocate(tail);
-    tail = current_node.next;
+    tail = current->next;
     nodes[tail].next = -1;
 
     return to_pop;
@@ -141,15 +137,15 @@ void CursorList<T>::clear() {
 
 template <class T>
 int CursorList<T>::find(T x) {
-    Node current_node = nodes[head];
+    Node *current = &nodes[head];
     int current_idx = head;
     int idx = 0;
     while (current_idx != -1) {
-        if (current_node.value == x)
+        if (current->value == x)
             return idx;
         idx++;
-        current_idx = current_node.next;
-        current_node = nodes[current_idx];
+        current_idx = current->next;
+        current = &nodes[current_idx];
     }
     return -1;
 }
@@ -205,16 +201,16 @@ void CursorList<T>::insert(int idx, T x) {
 
 template <class T>
 int CursorList<T>::remove(T x) {
-    Node current_node = nodes[head];
-    int current_idx = head;
-    while (current_node.next != -1) {
-        if (current_node.value == x) {
-            int test = 0;
-        }
-        current_idx = current_node.next;
-        current_node = current_node[current_idx];
+    int occurencies = 0;
+    int temp = _size;
+    for (int i = 0; i < temp; i++) {
+        int to_remove = find(x);
+        if (to_remove == -1)
+            break;
+        erase(to_remove);
+        occurencies++;
     }
-    return 0;
+    return occurencies;
 }
 
 template <class T>
@@ -229,34 +225,5 @@ void CursorList<T>::deallocate(int idx) {
     nodes[idx].next = spare;
     spare = idx;
 }
-
-template <class T>
-void CursorList<T>::printfree() {
-    Node current_node = nodes[spare];
-    std::cout << "spare" << spare;
-    while (current_node.next != -1)
-    {
-        std::cout << current_node.next;
-        current_node = nodes[current_node.next];
-    }
-    
-}
-
-template <class T>
-void CursorList<T>::printlist() {
-    Node current = nodes[head];
-    int this_idx = head;
-    for (int i = 0; i < _size; i++) {
-        std::cout << "value: " << current.value << "next: " << current.next << std::endl;
-        current = nodes[current.next];
-    }
-    Node current2 = nodes[head];
-    // for (int i = 1; i < _size; i++) {
-    //     std::cout << "idx: " << this_idx  << std::endl;
-    //     this_idx = current2.next;
-    //     current2 = nodes[current2.next];
-    // }
-}
-
 
 #endif

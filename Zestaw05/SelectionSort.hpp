@@ -12,7 +12,8 @@ void sort(std::vector<T> &v) {
             if (v.at(j) < v.at(min_idx))
                 min_idx = j;
         }
-        std::swap(v.at(i), v.at(min_idx));
+        if (i != min_idx)
+            std::swap(v.at(i), v.at(min_idx));
     }
 }
 

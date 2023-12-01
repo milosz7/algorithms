@@ -209,6 +209,7 @@ int CursorList<T>::remove(T x) {
             break;
         erase(to_remove);
         occurencies++;
+        _size--;
     }
     return occurencies;
 }

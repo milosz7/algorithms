@@ -7,14 +7,14 @@ void ArrayStack::push(int x) {
     if (current == _capacity)
         throw std::out_of_range("Stack size exceeded.");
     
-    stack[++current] = x;
+    stack[current++] = x;
 }
 
 int ArrayStack::pop() {
     if (empty())
         throw std::out_of_range("Stack is empty.");
 
-    return stack[current--];
+    return stack[--current];
 }
 
 int ArrayStack::size() { return current; }

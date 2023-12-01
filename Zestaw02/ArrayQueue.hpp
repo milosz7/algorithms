@@ -26,7 +26,7 @@ private:
 template <class T>
 template <class U>
 void ArrayQueue<T>::push(U &&x) {
-    if ((head - tail) == _capacity)
+    if (size() == _capacity)
         throw std::out_of_range("Stack is full!");
     queue[(tail++) % _capacity] = std::forward<U>(x);
 }

@@ -19,9 +19,9 @@ class LinkedList {
     LinkedList();
     ~LinkedList();
     void push_front(T x);
-    int pop_front();
+    T pop_front();
     void push_back(T x);
-    int pop_back();
+    T pop_back();
     int size();
     bool empty();
     void clear();
@@ -62,7 +62,7 @@ void LinkedList<T>::push_front(T x) {
 }
 
 template <class T>
-int LinkedList<T>::pop_front() {
+T LinkedList<T>::pop_front() {
     if (empty())
         throw std::out_of_range("List is empty!");
     Node *head = indirect->next;
@@ -84,7 +84,7 @@ void LinkedList<T>::push_back(T x) {
 }
 
 template <class T>
-int LinkedList<T>::pop_back() {
+T LinkedList<T>::pop_back() {
     if (empty())
         throw std::out_of_range("List is empty!");
     Node *tail = indirect->prev;

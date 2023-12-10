@@ -3,7 +3,7 @@ CXXFLAGS := -Wall -Wextra -O3 -pedantic
 LDFLAGS :=
 
 HEADERS := $(wildcard *.hpp)
-TAR_FNAME := Milosz_Bargiel_Zestaw04.tar.gz
+TAR_FNAME := Milosz_Bargiel_Zestaw06.tar.gz
 TO_COMPRESS := $(filter-out $(wildcard *.[o|x]), $(wildcard *))
 
 .PHONY: all clean tar

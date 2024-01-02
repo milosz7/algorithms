@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <numeric>
 #include <stdlib.h>
+#include <regex>
 
 class tANS {
     using Pair = std::pair<char, double>;
@@ -39,8 +40,9 @@ class tANS {
         std::vector<char> symbols;
         std::vector<int> states_temp;
         std::vector<int> nb_bits;
-        std::vector<std::pair<char, double>> symbol_data;
+        std::vector<Pair*> symbol_data;
 
+        bool validate_line(std::string &line);
         void spread();
         void generate_states();
         void generate_nb_bits();

@@ -3,10 +3,13 @@
 tANS::~tANS() {
     for (DecodingNode* t : decoding_table)
         delete t;
+    for (Pair *p : symbol_data)
+        delete p;
 }
 
 void tANS::read_data(std::string filename) {
     std::ifstream input;
+    std::string line;
     constexpr double tolerance = 0.01;
     char symbol;
     double proba, proba_sum;
@@ -17,19 +20,38 @@ void tANS::read_data(std::string filename) {
         exit(1);
     }
 
-    while(input >> symbol && input >> proba) {
-        Pair pair;
-        pair.first = symbol;
-        pair.second = proba;
+    while (input.peek() != EOF) {
+        getline(input, line);
+        if (!validate_line(line)) {
+            std::cerr << "Input line: " << line << " is invalid!";
+            exit(1);
+        }
+
+        std::size_t delim = line.find_last_of(",");
+        char symbol = line[0];
+        double proba = std::stod(line.substr(delim + 1));
+
+        Pair *pair = new Pair;
+        pair->first = symbol;
+        pair->second = proba;
         proba_sum += proba;
         symbol_data.push_back(pair);
     }
 
-    if (abs(proba_sum - 1.0) > tolerance)
-        throw std::invalid_argument("Probabilities of symbols must sum up to approximately 1.0!");
+    if (abs(proba_sum - 1.0) > tolerance) {
+        std::cerr 
+            << "Sum of probabilities is outsde the range! (tolerance is: +-" << tolerance << ")" 
+            << std::endl;
+        exit(1);
+    }
         
     input.close();
     create_tables();
+}
+
+bool tANS::validate_line(std::string &line) {
+    std::regex reg("[ -~],\\d{1,2}\\.\\d+");
+    return std::regex_match(line, reg);
 }
 
 void tANS::spread() {
@@ -45,9 +67,9 @@ void tANS::spread() {
     }
     symbols.resize(L);
 
-    for (Pair pair : symbol_data) {
-        char symbol = pair.first;
-        double proba = pair.second;
+    for (Pair *pair : symbol_data) {
+        char symbol = pair->first;
+        double proba = pair->second;
         int L_s = proba * L;
         ls_map[symbol] = L_s;
 
@@ -68,9 +90,9 @@ void tANS::generate_nb_bits() {
     int vocab_size = symbol_data.size();
     int r = R + 1;
 
-    for (Pair pair : symbol_data) {
-        char symbol = pair.first;
-        double proba = pair.second;
+    for (Pair *pair : symbol_data) {
+        char symbol = pair->first;
+        double proba = pair->second;
         int L_s = proba * L;
         int k_s = R - floor(log2(L_s));
         int nb_val = (k_s << r) - (L_s << k_s);
@@ -86,13 +108,13 @@ void tANS::generate_nb_bits() {
 void tANS::generate_start() {
     int vocab_size = symbol_data.size();
     for (int i = 0; i < vocab_size; i++) {
-        Pair current = symbol_data.at(i);
-        double proba = current.second;
-        char symbol = current.first;
+        Pair *current = symbol_data.at(i);
+        double proba = current->second;
+        char symbol = current->first;
         int L_r = proba * L;
         int start = -1 * L_r;
         for (int j = i+1; j < vocab_size; j++) {
-            double proba_prim = symbol_data.at(j).second;
+            double proba_prim = symbol_data.at(j)->second;
             int L_r_prim = proba_prim * L;
             start += L_r_prim;
         }

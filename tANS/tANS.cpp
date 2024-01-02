@@ -29,6 +29,7 @@ void tANS::read_data(std::string filename) {
         throw std::invalid_argument("Probabilities of symbols must sum up to approximately 1.0!");
         
     input.close();
+    create_tables();
 }
 
 void tANS::spread() {

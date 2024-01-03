@@ -96,7 +96,7 @@ void tANS::generate_nb_bits() {
 
 void tANS::generate_start() {
     int vocab_size = symbol_data.size();
-    
+
     for (int i = 0; i < vocab_size; i++) {
         Pair *current = symbol_data.at(i);
         double proba = current->second;
@@ -236,16 +236,14 @@ std::string tANS::decode(std::vector<bool> message) {
     return output;
 }
 
-void tANS::encode_file(std::string filename) {
+void tANS::encode_file(std::string filename_in, std::string filename_out) {
     std::ifstream input;
     std::string line;
     std::vector<bool> message;
     std::vector<bool> line_encoded;
 
-    std::string out_filename = "compressed_" + filename;
-
-    std::ofstream output{out_filename};
-    input.open(filename);
+    std::ofstream output{filename_out};
+    input.open(filename_in);
 
     if (!output.is_open()) {
         std::cerr << "Error while opening output encode file!" << std::endl;
@@ -303,15 +301,14 @@ void tANS::dump_line(std::vector<bool> &line, std::ofstream &output) {
 
 int tANS::min(int a, int b) { return (a < b) ? a : b; }
 
-void tANS::decode_file(std::string filename) {
+void tANS::decode_file(std::string filename_in, std::string filename_out) {
     std::ifstream input;
     std::string line, line_decoded;
     std::vector<bool> line_bits;
-    std::string out_filename = "decoded_" + filename;
     unsigned long long encoded;
 
-    std::ofstream output{out_filename};
-    input.open(filename);
+    std::ofstream output{filename_out};
+    input.open(filename_in);
 
     if (!output.is_open()) {
         std::cerr << "Error while opening output encode file!" << std::endl;
@@ -334,6 +331,9 @@ void tANS::decode_file(std::string filename) {
         }
         output << "\n";
     }
+
+    input.close();
+    output.close();
 }
 
 void tANS::ull_to_encoded(std::vector<bool> &message, unsigned long long line_chunk) {

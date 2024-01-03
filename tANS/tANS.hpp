@@ -2,14 +2,14 @@
 #define ANS_H
 #include <vector>
 #include <iostream>
-#include <math.h>
+#include <cmath>
 #include <utility>
 #include <stdexcept>
 #include <fstream>
 #include <map>
 #include <algorithm>
 #include <numeric>
-#include <stdlib.h>
+#include <cstdlib>
 #include <regex>
 #include <iterator>
 #include <sstream>

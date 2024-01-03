@@ -15,6 +15,7 @@
 
 class tANS {
     using Pair = std::pair<char, double>;
+    using ull = unsigned long long;
 
     public:
         struct DecodingNode {
@@ -55,7 +56,7 @@ class tANS {
         void create_tables();
         void dump_line(std::vector<bool> &line, std::ofstream &output);
         int min(int a, int b);
-        void ull_to_encoded(std::vector<bool> &message, unsigned long long line_chunk);
+        void ull_to_encoded(std::vector<bool> &message, ull line_chunk);
 };
 
 #endif

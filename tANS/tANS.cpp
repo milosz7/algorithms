@@ -66,6 +66,7 @@ void tANS::spread() {
         R += 1;
     }
     symbols.resize(L);
+    state0 = L;
 
     for (Pair *pair : symbol_data) {
         char symbol = pair->first;
@@ -162,7 +163,7 @@ void tANS::output_state(std::vector<bool> &message, int state) {
 std::vector<bool> tANS::encode(std::string message) {
     std::vector<bool> result;
     int r = R + 1;
-    int state = L;
+    int state = state0;
     int len = message.length();
     
     for (int i = 0; i < len; i++) {

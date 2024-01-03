@@ -32,7 +32,7 @@ class tANS {
         void decode_file(std::string filename_in, std::string filename_out);
 
     private:
-        int L, R;
+        int L, R, state0;
         std::map<char, int> ls_map;
         std::map<char, int> symbol_start;
         std::map<char, int> nb;

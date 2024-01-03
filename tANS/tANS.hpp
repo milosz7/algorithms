@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <regex>
 #include <iterator>
+#include <sstream>
 
 class tANS {
     using Pair = std::pair<char, double>;
@@ -28,6 +29,7 @@ class tANS {
         std::vector<bool> encode(std::string message);
         std::string decode(std::vector<bool> message);
         void encode_file(std::string filename);
+        void decode_file(std::string filename);
 
     private:
         int L, R;
@@ -59,6 +61,7 @@ class tANS {
         void create_tables();
         void dump_line(std::vector<bool> &line, std::ofstream &output);
         int min(int a, int b);
+        void ull_to_encoded(std::vector<bool> &message, unsigned long long line_chunk);
 };
 
 #endif

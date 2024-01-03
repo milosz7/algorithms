@@ -279,10 +279,8 @@ void tANS::encode_file(std::string filename) {
         std::copy(line_encoded.begin(), line_encoded.end(), insert);
         dump_line(line_encoded, output);
     }
-    std::cout << "Encoded message: ";
     for (int i = 0; i < message.size(); i++)
         std::cout << message.at(i);
-    std::cout << std::endl;
     input.close();
     output.close();
 }
@@ -296,14 +294,15 @@ void tANS::dump_line(std::vector<bool> &line, std::ofstream &output) {
 
     while ((current_size = line.size())) {
         int bits_to_dump = min(int_bits, current_size);
+        chunk_vec.resize(bits_to_dump);
 
         for (int i = 0; i < bits_to_dump; i++) {
-            chunk_vec.push_back(line.back());
+            chunk_vec.at(i) = line.back();
             line.pop_back();
         }
 
         if (bits_to_dump > acc_threshold) {
-             encoded = std::accumulate(chunk_vec.begin(), chunk_vec.end(), 0, 
+             encoded = std::accumulate(chunk_vec.begin(), chunk_vec.end(), (unsigned long long)0, 
                         [](unsigned long long p, unsigned long long q)
                         { return (p << 1) + q; }
                       );
@@ -316,3 +315,42 @@ void tANS::dump_line(std::vector<bool> &line, std::ofstream &output) {
 }
 
 int tANS::min(int a, int b) { return (a < b) ? a : b; }
+
+void tANS::decode_file(std::string filename) {
+    std::ifstream input;
+    std::string line, line_decoded;
+    std::vector<bool> line_bits;
+    std::string out_filename = "decoded_" + filename;
+    unsigned long long encoded;
+
+    std::ofstream output{out_filename};
+    input.open(filename);
+
+    if (!output.is_open()) {
+        std::cerr << "Error while opening output encode file!" << std::endl;
+        exit(1);
+    }
+    
+    if (input.fail()) {
+        std::cerr << "Error while opening input encode file!" << std::endl;
+        exit(1);
+    }
+
+    while (input.peek() != EOF) {
+        getline(input, line);
+        std::stringstream ss_line(line);
+        while (ss_line >> encoded) {
+            ull_to_encoded(line_bits, encoded);
+            line_decoded = decode(line_bits);
+            output << line_decoded;
+            line_bits.clear();
+        }
+        output << "\n";
+    }
+}
+
+void tANS::ull_to_encoded(std::vector<bool> &message, unsigned long long line_chunk) {
+    int n_bits = (int)log2(line_chunk) + 1;
+    for (int i = 0; i < n_bits; i++, line_chunk >>= 1)
+        message.push_back(line_chunk & 1);
+}

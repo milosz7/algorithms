@@ -4,7 +4,6 @@
 #include <iostream>
 #include <cmath>
 #include <utility>
-#include <stdexcept>
 #include <fstream>
 #include <map>
 #include <algorithm>
@@ -38,17 +37,12 @@ class tANS {
         std::map<char, int> nb;
 
         std::vector<DecodingNode*> decoding_table;
-        std::vector<int> new_x;
         std::vector<int> encoding_table;
-        std::vector<int> states;
         std::vector<char> symbols;
-        std::vector<int> states_temp;
-        std::vector<int> nb_bits;
         std::vector<Pair*> symbol_data;
 
         bool validate_line(std::string &line);
         void spread();
-        void generate_states();
         void generate_nb_bits();
         void generate_start();
         void generate_encoding_table();

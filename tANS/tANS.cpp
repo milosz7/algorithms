@@ -80,12 +80,6 @@ void tANS::spread() {
     }
 }
 
-void tANS::generate_states() {
-    states.resize(L);
-    for (int i = 0; i < L; i++)
-        states.at(i) = L + i;
-}
-
 void tANS::generate_nb_bits() {
     int vocab_size = symbol_data.size();
     int r = R + 1;
@@ -98,15 +92,11 @@ void tANS::generate_nb_bits() {
         int nb_val = (k_s << r) - (L_s << k_s);
         nb[symbol] = nb_val;
     }
-
-    nb_bits.resize(L);
-    for (int i = 0; i < L; i++) {
-        nb_bits[i] = (states[i] + nb[symbols[i]]) >> r;
-    }
 }
 
 void tANS::generate_start() {
     int vocab_size = symbol_data.size();
+    
     for (int i = 0; i < vocab_size; i++) {
         Pair *current = symbol_data.at(i);
         double proba = current->second;
@@ -159,6 +149,7 @@ int tANS::get_extractor(int exp) {
 void tANS::use_bits(std::vector<bool>&message, int state, int nb_bits) {
     int n_to_extract = get_extractor(nb_bits);
     int least_significant_bits = state & n_to_extract;
+    
     for (int i = 0; i < nb_bits; i++, least_significant_bits >>= 1)
         message.push_back((least_significant_bits & 1));
 }
@@ -171,7 +162,7 @@ void tANS::output_state(std::vector<bool> &message, int state) {
 std::vector<bool> tANS::encode(std::string message) {
     std::vector<bool> result;
     int r = R + 1;
-    int state = states[0];
+    int state = L;
     int len = message.length();
     
     for (int i = 0; i < len; i++) {
@@ -224,7 +215,6 @@ int tANS::update_decoding_state(std::vector<bool> &message, int nb_bits, int new
 
 void tANS::create_tables() {
     spread();
-    generate_states();
     generate_nb_bits();
     generate_start();
     generate_encoding_table();
@@ -274,13 +264,10 @@ void tANS::encode_file(std::string filename) {
         auto it = message.begin();
         std::advance(it, message.size());
         std::insert_iterator<std::vector<bool>> insert(message, it);
-        // auto copy_start = line_encoded.begin();
-        // auto copy_end = line_encoded.end();
         std::copy(line_encoded.begin(), line_encoded.end(), insert);
         dump_line(line_encoded, output);
     }
-    for (int i = 0; i < message.size(); i++)
-        std::cout << message.at(i);
+
     input.close();
     output.close();
 }

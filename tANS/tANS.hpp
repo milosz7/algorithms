@@ -11,6 +11,7 @@
 #include <numeric>
 #include <stdlib.h>
 #include <regex>
+#include <iterator>
 
 class tANS {
     using Pair = std::pair<char, double>;
@@ -26,6 +27,7 @@ class tANS {
         void read_data(std::string filename);
         std::vector<bool> encode(std::string message);
         std::string decode(std::vector<bool> message);
+        void encode_file(std::string message);
 
     private:
         int L, R;
@@ -55,6 +57,8 @@ class tANS {
         int read_decoding_state(std::vector<bool>&message);
         int update_decoding_state(std::vector<bool> &message, int nb_bits, int x_old);
         void create_tables();
+        void dump_line(std::vector<bool> &line, std::ofstream &output);
+        int min(int a, int b);
 };
 
 #endif

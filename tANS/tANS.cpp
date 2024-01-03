@@ -245,3 +245,74 @@ std::string tANS::decode(std::vector<bool> message) {
     std::reverse(output.begin(), output.end());
     return output;
 }
+
+void tANS::encode_file(std::string filename) {
+    std::ifstream input;
+    std::string line;
+    std::vector<bool> message;
+    std::vector<bool> line_encoded;
+
+    std::string out_filename = filename + "_out.txt";
+
+    std::ofstream output{out_filename};
+    input.open(filename);
+
+    if (!output.is_open()) {
+        std::cerr << "Error while opening output encode file!" << std::endl;
+        exit(1);
+    }
+    
+    if (input.fail()) {
+        std::cerr << "Error while opening input encode file!" << std::endl;
+        exit(1);
+    }
+
+    while(input.peek() != EOF) {
+        getline(input, line);
+
+        line_encoded = encode(line);
+        auto it = message.begin();
+        std::advance(it, message.size());
+        std::insert_iterator<std::vector<bool>> insert(message, it);
+        // auto copy_start = line_encoded.begin();
+        // auto copy_end = line_encoded.end();
+        std::copy(line_encoded.begin(), line_encoded.end(), insert);
+        dump_line(line_encoded, output);
+    }
+    std::cout << "Encoded message: ";
+    for (int i = 0; i < message.size(); i++)
+        std::cout << message.at(i);
+    std::cout << std::endl;
+    input.close();
+    output.close();
+}
+
+void tANS::dump_line(std::vector<bool> &line, std::ofstream &output) {
+    constexpr int int_bits = 64;
+    constexpr int acc_threshold = 1;
+    std::vector<bool> chunk_vec;
+    unsigned long long encoded;
+    int current_size;
+
+    while ((current_size = line.size())) {
+        int bits_to_dump = min(int_bits, current_size);
+
+        for (int i = 0; i < bits_to_dump; i++) {
+            chunk_vec.push_back(line.back());
+            line.pop_back();
+        }
+
+        if (bits_to_dump > acc_threshold) {
+             encoded = std::accumulate(chunk_vec.begin(), chunk_vec.end(), 0, 
+                        [](unsigned long long p, unsigned long long q)
+                        { return (p << 1) + q; }
+                      );
+        } else {
+            encoded = chunk_vec.at(0);
+        }
+        output << encoded << ((line.size()) ? " " : "\n");
+        chunk_vec.clear();
+    }
+}
+
+int tANS::min(int a, int b) { return (a < b) ? a : b; }

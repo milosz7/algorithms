@@ -27,7 +27,7 @@ class tANS {
         void read_data(std::string filename);
         std::vector<bool> encode(std::string message);
         std::string decode(std::vector<bool> message);
-        void encode_file(std::string message);
+        void encode_file(std::string filename);
 
     private:
         int L, R;

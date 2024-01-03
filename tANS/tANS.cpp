@@ -252,7 +252,7 @@ void tANS::encode_file(std::string filename) {
     std::vector<bool> message;
     std::vector<bool> line_encoded;
 
-    std::string out_filename = filename + "_out.txt";
+    std::string out_filename = "compressed_" + filename;
 
     std::ofstream output{out_filename};
     input.open(filename);

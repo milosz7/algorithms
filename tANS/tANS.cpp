@@ -54,37 +54,103 @@ bool tANS::validate_line(std::string &line) {
     return std::regex_match(line, reg);
 }
 
-void tANS::spread() {
+void tANS::set_table_size() {
     L = 1;
     R = 0;
-    int i = 0;
     int vocab_size = symbol_data.size();
 
     while (L < 4 * vocab_size) {
         L *= 2;
         R += 1;
     }
-    symbols.resize(L);
-    state0 = L;
-    int step = (5 * L) / 8 + 3;
-    int ls_sum = 0;
+}
 
+// https://github.com/JarekDuda/AsymmetricNumeralSystemsToolkit/blob/master/ANStoolkit.cpp
+void tANS::quantize_probabilities_fast() {
+    int used = 0;
+    char max_proba_symbol;
+    double max_proba = 0;
     for (Pair *pair : symbol_data) {
         char symbol = pair->first;
         double proba = pair->second;
-        int L_s = std::round(proba * L);
-        ls_map[symbol] = L_s;
-        
-        for (int j = 0; j < L_s; j++) {
-            // std::cout << "i: "<< i << "symbol " << (int)symbol << std::endl;
-            symbols[i] = symbol;
-            i = (i + step) % L;
-            ls_sum += 1;
+        ls_map[symbol] = std::round(L * proba);
+
+        if (!ls_map[symbol])
+            ls_map[symbol]++;
+        used += ls_map[symbol];
+
+        if(proba > max_proba) {
+            max_proba = proba;
+            max_proba_symbol = symbol;  
         }
     }
-    std::cout << "ls sum: " << ls_sum << "L: " << L;
-    // for (std::pair<char, int> pair : ls_map)
-    //     std::cout << pair.first << ": " << pair.second <<std::endl;
+    ls_map[max_proba_symbol] += L - used;
+}
+
+// https://github.com/JarekDuda/AsymmetricNumeralSystemsToolkit/blob/master/ANStoolkit.cpp
+void tANS::quantize_probabilities() {
+    int vocab_size = symbol_data.size();
+    std::map<char, double> proba_exact;
+    std::map<char, double> inverse_proba;
+    std::map<char, double> current_cost;
+    int used = 0;
+
+    for (Pair *p : symbol_data) {
+        char symbol = p->first;
+        double proba = p->second;
+        proba_exact[symbol] = proba * L;
+        inverse_proba[symbol] = 1.0 / proba;
+        ls_map[symbol] = std::round(proba_exact[symbol]);
+        if (!ls_map[symbol])
+            ls_map[symbol]++;
+        used += ls_map[symbol];
+        current_cost[symbol] = pow(proba_exact[symbol] - ls_map[symbol], 2.0) * inverse_proba[symbol]; 
+    }
+
+    if (used != L) {
+        int sgn = (used > L) ? -1 : 1;
+        std::vector<std::pair<double, char>> v;
+        for (Pair *p : symbol_data) {
+            char symbol = p->first;
+            if (ls_map[symbol] + sgn)
+                v.push_back(
+                    {current_cost[symbol] - pow(proba_exact[symbol] - (ls_map[symbol] + sgn), 2) * inverse_proba[symbol],
+                     symbol}
+                    );
+        }
+        std::make_heap(v.begin(), v.end());
+
+        for( ; used != L; used += sgn) {
+            auto pair = v.front();
+            std::pop_heap(v.begin(), v.end());
+            v.pop_back();
+            current_cost[pair.second] -= pair.first;
+            if ((ls_map[pair.second] += sgn) + sgn) {
+                v.push_back(
+                    {current_cost[pair.second] - pow(proba_exact[pair.second] - (ls_map[pair.second] + sgn), 2) * inverse_proba[pair.second], 
+                     pair.second}
+                    );
+                std::push_heap (v.begin(), v.end());
+            }
+        }
+    }
+}
+
+void tANS::spread() {
+    symbols.resize(L);
+    state0 = L;
+    int i = 0;
+    int step = (L >> 1) + (L >> 3) + 3;
+    int mask = L - 1;
+
+    for (Pair *pair : symbol_data) {
+        char symbol = pair->first;
+        int L_s = ls_map[symbol];
+        for (int j = 0; j < L_s; j++) {
+            symbols[i] = symbol;
+            i = (i + step) & mask;
+        }
+    }
 }
 
 void tANS::generate_nb_bits() {
@@ -94,7 +160,7 @@ void tANS::generate_nb_bits() {
     for (Pair *pair : symbol_data) {
         char symbol = pair->first;
         double proba = pair->second;
-        int L_s = std::round(proba * L);
+        int L_s = ls_map[symbol];
         int k_s = R - floor(log2(L_s));
         int nb_val = (k_s << r) - (L_s << k_s);
         nb[symbol] = nb_val;
@@ -104,15 +170,14 @@ void tANS::generate_nb_bits() {
 void tANS::generate_start() {
     int vocab_size = symbol_data.size();
 
-    for (int i = 0; i < vocab_size; i++) {
+    for (int i = vocab_size - 1; i >= 0; i--) {
         Pair *current = symbol_data.at(i);
-        double proba = current->second;
         char symbol = current->first;
-        int L_r = std::round(proba * L);
+        int L_r = ls_map[symbol];
         int start = -1 * L_r;
-        for (int j = i+1; j < vocab_size; j++) {
-            double proba_prim = symbol_data.at(j)->second;
-            int L_r_prim = std::round(proba_prim * L);
+        for (int j = 0; j < i; j++) {
+            char symbol_prim = symbol_data.at(j)->first;
+            int L_r_prim = ls_map[symbol_prim];
             start += L_r_prim;
         }
         symbol_start[symbol] = start;
@@ -125,8 +190,9 @@ void tANS::generate_encoding_table() {
 
     for (int x = L; x < 2 * L; x++) {
         char s = symbols[x - L];
-        encoding_table[symbol_start[s] + (next[s]++)] = x;
-    }
+        // std::cout << s << ": " << symbol_start[s] <<std::endl;
+        encoding_table[symbol_start[s] + (next[s])++] = x;
+    }        
 }
 
 void tANS::generate_decoding_table() {
@@ -221,6 +287,8 @@ int tANS::update_decoding_state(std::vector<bool> &message, int nb_bits, int new
 }
 
 void tANS::create_tables() {
+    set_table_size();
+    quantize_probabilities();
     spread();
     generate_nb_bits();
     generate_start();

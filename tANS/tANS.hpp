@@ -43,6 +43,9 @@ class tANS {
         std::vector<Pair*> symbol_data;
 
         bool validate_line(std::string &line);
+        void set_table_size();
+        void quantize_probabilities_fast();
+        void quantize_probabilities();
         void spread();
         void generate_nb_bits();
         void generate_start();

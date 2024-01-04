@@ -12,7 +12,7 @@ void tANS::read_data(std::string filename) {
     std::string line;
     constexpr double tolerance = 0.01;
     char symbol;
-    double proba, proba_sum;
+    double proba, proba_sum = 0;
     
     input.open(filename);
     if (input.fail()) {
@@ -38,7 +38,7 @@ void tANS::read_data(std::string filename) {
         symbol_data.push_back(pair);
     }
 
-    if (abs(proba_sum - 1.0) > tolerance) {
+    if (std::abs(proba_sum - 1.0) > tolerance) {
         std::cerr 
             << "Sum of probabilities is outsde the range! (tolerance is: +-" << tolerance << ")" 
             << std::endl;
@@ -58,7 +58,6 @@ void tANS::spread() {
     L = 1;
     R = 0;
     int i = 0;
-    int step = (5 * L) / 8 + 3;
     int vocab_size = symbol_data.size();
 
     while (L < 4 * vocab_size) {
@@ -67,18 +66,25 @@ void tANS::spread() {
     }
     symbols.resize(L);
     state0 = L;
+    int step = (5 * L) / 8 + 3;
+    int ls_sum = 0;
 
     for (Pair *pair : symbol_data) {
         char symbol = pair->first;
         double proba = pair->second;
-        int L_s = proba * L;
+        int L_s = std::round(proba * L);
         ls_map[symbol] = L_s;
-
+        
         for (int j = 0; j < L_s; j++) {
+            // std::cout << "i: "<< i << "symbol " << (int)symbol << std::endl;
             symbols[i] = symbol;
             i = (i + step) % L;
+            ls_sum += 1;
         }
     }
+    std::cout << "ls sum: " << ls_sum << "L: " << L;
+    // for (std::pair<char, int> pair : ls_map)
+    //     std::cout << pair.first << ": " << pair.second <<std::endl;
 }
 
 void tANS::generate_nb_bits() {
@@ -88,7 +94,7 @@ void tANS::generate_nb_bits() {
     for (Pair *pair : symbol_data) {
         char symbol = pair->first;
         double proba = pair->second;
-        int L_s = proba * L;
+        int L_s = std::round(proba * L);
         int k_s = R - floor(log2(L_s));
         int nb_val = (k_s << r) - (L_s << k_s);
         nb[symbol] = nb_val;
@@ -102,11 +108,11 @@ void tANS::generate_start() {
         Pair *current = symbol_data.at(i);
         double proba = current->second;
         char symbol = current->first;
-        int L_r = proba * L;
+        int L_r = std::round(proba * L);
         int start = -1 * L_r;
         for (int j = i+1; j < vocab_size; j++) {
             double proba_prim = symbol_data.at(j)->second;
-            int L_r_prim = proba_prim * L;
+            int L_r_prim = std::round(proba_prim * L);
             start += L_r_prim;
         }
         symbol_start[symbol] = start;
@@ -210,7 +216,7 @@ int tANS::update_decoding_state(std::vector<bool> &message, int nb_bits, int new
     } else {
         x_add = state_vec.at(0);
     }
-    
+
     return new_x + x_add;
 }
 
@@ -272,14 +278,18 @@ void tANS::encode_file(std::string filename_in, std::string filename_out) {
 }
 
 void tANS::dump_line(std::vector<bool> &line, std::ofstream &output) {
-    constexpr int int_bits = 64;
+    int out_bits = 64;
     constexpr int acc_threshold = 1;
     std::vector<bool> chunk_vec;
     ull encoded;
     int current_size;
 
     while ((current_size = line.size())) {
-        int bits_to_dump = min(int_bits, current_size);
+        int bits_to_dump = min(out_bits, current_size);
+        // meaning zero should be the output
+        if (line.back() == 0)
+            bits_to_dump = 1;
+
         chunk_vec.resize(bits_to_dump);
 
         for (int i = 0; i < bits_to_dump; i++) {
@@ -324,12 +334,12 @@ void tANS::decode_file(std::string filename_in, std::string filename_out) {
     while (input.peek() != EOF) {
         getline(input, line);
         std::stringstream ss_line(line);
-        while (ss_line >> encoded) {
+
+        while (ss_line >> encoded)
             ull_to_encoded(line_bits, encoded);
-            line_decoded = decode(line_bits);
-            output << line_decoded;
-            line_bits.clear();
-        }
+        line_decoded = decode(line_bits);
+        output << line_decoded;
+        line_bits.clear();
         output << "\n";
     }
 
@@ -338,7 +348,14 @@ void tANS::decode_file(std::string filename_in, std::string filename_out) {
 }
 
 void tANS::ull_to_encoded(std::vector<bool> &message, ull line_chunk) {
-    int n_bits = (int)log2(line_chunk) + 1;
-    for (int i = 0; i < n_bits; i++, line_chunk >>= 1)
-        message.push_back(line_chunk & 1);
+    std::vector<bool> message_chunk;
+    int n_bits = ((line_chunk == 0) ? 0 : std::log2(line_chunk)) + 1;
+
+    for (int i = 0; i < n_bits; i++, line_chunk >>= 1) {
+        message_chunk.push_back(line_chunk & 1);
+    }
+    int size_old = message.size();
+    auto it = message.begin();
+    std::insert_iterator<std::vector<bool>> insert(message, it);
+    std::copy(message_chunk.begin(), message_chunk.end(), insert);
 }

@@ -10,7 +10,7 @@ tANS::~tANS() {
 void tANS::read_data(std::string filename) {
     std::ifstream input;
     std::string line;
-    constexpr double tolerance = 0.01;
+    double tolerance = 0.01;
     char symbol;
     double proba, proba_sum = 0;
     alphabet = "";
@@ -263,7 +263,7 @@ int tANS::read_decoding_state(std::vector<bool> &message) {
 }
 
 int tANS::update_decoding_state(std::vector<bool> &message, int nb_bits, int new_x) {
-    constexpr int acc_threshold = 1;
+    int accumulate_threshold = 1;
     std::vector<bool> state_vec;
     int x_add;
 
@@ -272,7 +272,7 @@ int tANS::update_decoding_state(std::vector<bool> &message, int nb_bits, int new
         message.pop_back();
     }
 
-    if (state_vec.size() > acc_threshold) {
+    if (state_vec.size() > accumulate_threshold) {
         x_add = bits_to_int(state_vec);
     } else {
         x_add = state_vec.at(0);

@@ -15,7 +15,7 @@ The `read_data` method reads the contents of an alphabet text file line by line.
 ```
 alphabet_character,probability
 ```
-Where `alphabet_character` is a single printable ASCII character, and probability is a string representation of a double following the regular expression: `\d{1,2}\.\d+`. Any invalid input is going to be detected and the program won't run. The probabilities must sum up approximately to 1!
+Where `alphabet_character` is a single printable ASCII character and probability is a string representation of a double following the regular expression: `\d{1,2}\.\d+`. Any invalid input is going to be detected and the program won't run. The probabilities must sum up approximately to 1!
 
 ### demo.cpp
 The `demo.cpp` file contains the presentation of all avaliable methods. In order to compile it use the following command:

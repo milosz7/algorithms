@@ -32,9 +32,7 @@ void tANS::read_data(std::string filename) {
         char symbol = line[0];
         double proba = std::stod(line.substr(delim + 1));
 
-        Pair *pair = new Pair;
-        pair->first = symbol;
-        pair->second = proba;
+        Pair *pair = new Pair{symbol, proba};
         proba_sum += proba;
         symbol_data.push_back(pair);
         alphabet.push_back(symbol);

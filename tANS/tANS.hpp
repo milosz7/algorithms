@@ -39,6 +39,7 @@ class tANS {
         std::map<char, int> ls_map;
         std::map<char, int> symbol_start;
         std::map<char, int> nb;
+        std::string alphabet;
 
         std::vector<DecodingNode*> decoding_table;
         std::vector<int> encoding_table;

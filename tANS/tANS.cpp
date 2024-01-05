@@ -13,6 +13,7 @@ void tANS::read_data(std::string filename) {
     constexpr double tolerance = 0.01;
     char symbol;
     double proba, proba_sum = 0;
+    alphabet = "";
     
     input.open(filename);
     if (input.fail()) {
@@ -36,6 +37,7 @@ void tANS::read_data(std::string filename) {
         pair->second = proba;
         proba_sum += proba;
         symbol_data.push_back(pair);
+        alphabet.push_back(symbol);
     }
 
     if (std::abs(proba_sum - 1.0) > tolerance) {
@@ -236,6 +238,10 @@ std::vector<bool> tANS::encode(std::string message) {
     
     for (int i = 0; i < len; i++) {
         char symbol = message[i];
+        if (alphabet.find(symbol) == std::string::npos) {
+            std::cerr << "Character: " << symbol << " is not in the alphabet!" << std::endl;
+            exit(1);
+        }
         int nb_bits = (state + nb[symbol]) >> r;
         use_bits(result, state, nb_bits);
         state = encoding_table[symbol_start[symbol] + (state >> nb_bits)];

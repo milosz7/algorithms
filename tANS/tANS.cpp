@@ -291,7 +291,7 @@ void tANS::create_tables() {
     generate_decoding_table();
 }
 
-std::string tANS::decode(std::vector<bool> message) {
+std::string tANS::decode(std::vector<bool> &message) {
     std::string output = "";
     int x_start = read_decoding_state(message);
     DecodingNode* t = decoding_table.at(x_start - L);

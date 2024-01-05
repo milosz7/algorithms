@@ -1,7 +1,7 @@
 # tANS
 
 ### Introduction
-tANS is a variant of an asymmetric numeral systems algorithm created by Jarek Duda. [(paper)](https://arxiv.org/abs/1311.2540)
+tANS is a variant of an asymmetric numeral systems algorithm created by Jarek Duda [(paper)](https://arxiv.org/abs/1311.2540). The following project is a proof-of-concept implementation of it.
 
 ### Class methods
 - `void read_data(std::string filename)` - reads alphabet with probabilities of occurences of each symbol from a text file.

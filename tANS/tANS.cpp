@@ -190,7 +190,6 @@ void tANS::generate_encoding_table() {
 
     for (int x = L; x < 2 * L; x++) {
         char s = symbols[x - L];
-        // std::cout << s << ": " << symbol_start[s] <<std::endl;
         encoding_table[symbol_start[s] + (next[s])++] = x;
     }        
 }
@@ -213,7 +212,6 @@ void tANS::generate_decoding_table() {
 
 int tANS::get_extractor(int exp) {
     int result = 1;
-
     for (int i = 0; i < exp; i++)
         result *= 2;
     return result - 1;
@@ -274,6 +272,7 @@ int tANS::update_decoding_state(std::vector<bool> &message, int nb_bits, int new
         state_vec.push_back(message.back());
         message.pop_back();
     }
+
     if (state_vec.size() > acc_threshold) {
         x_add = std::accumulate(state_vec.begin(), state_vec.end(), 0, 
                     [](int p, int q)
@@ -330,11 +329,15 @@ void tANS::encode_file(std::string filename_in, std::string filename_out) {
         exit(1);
     }
 
-    while(input.peek() != EOF) {
-        getline(input, line);
-        line_encoded = encode(line);
-        dump_line(line_encoded, output);
+    getline(input, line);
+    
+    if (input.peek() != EOF) {
+        std::cerr << "File to encode has to have only one line!" << std::endl;
+        exit(1);
     }
+
+    line_encoded = encode(line);
+    dump_line(line_encoded, output);
 
     input.close();
     output.close();
@@ -350,6 +353,7 @@ void tANS::dump_line(std::vector<bool> &line, std::ofstream &output) {
         n_padding++;
         message_len += 1;
     }
+    
     std::bitset<CHAR_BIT> padding_bitset{n_padding};
     for (int i = 0; i < line.size(); i++)
         message_str += (line.at(i)) ? "1" : "0";
@@ -365,16 +369,12 @@ void tANS::dump_line(std::vector<bool> &line, std::ofstream &output) {
     unsigned long padding_l = padding_bitset.to_ulong();
     unsigned char padding_ch = static_cast<unsigned char>(padding_l);
     output << padding_ch;
-    // output << '\n';
 }
-
-int tANS::min(int a, int b) { return (a < b) ? a : b; }
 
 void tANS::decode_file(std::string filename_in, std::string filename_out) {
     std::ifstream input;
     std::string line, line_decoded;
     std::vector<bool> line_bits;
-    ull encoded;
     bool output_newline;
 
     std::ofstream output{filename_out};
@@ -391,56 +391,31 @@ void tANS::decode_file(std::string filename_in, std::string filename_out) {
         exit(1);
     }
 
-    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(input), {});
-    int n_bytes = buffer.size();
+    std::vector<unsigned char> bytes(std::istreambuf_iterator<char>(input), {});
+    int n_bytes = bytes.size();
     int last_idx = n_bytes - 1;
     for (int i = 0; i < n_bytes; i++) {
-        unsigned char h = buffer.at(i);
+        unsigned char h = bytes.at(i);
         std::bitset<CHAR_BIT> bits{h};
     }
 
-    unsigned char last_byte = buffer.at(last_idx);
+    unsigned char last_byte = bytes.at(last_idx);
     std::bitset<CHAR_BIT> bitset_last{last_byte};
     size_t n_to_skip = bitset_last.to_ulong();
-    //meaning last character is a newline;
-    output_newline = (n_to_skip >= (CHAR_BIT - 1));
-
-    if (output_newline) {
-        last_idx--;
-        last_byte = buffer.at(last_idx);
-        std::bitset<CHAR_BIT> bitset_to_skip{last_byte};
-        n_to_skip = bitset_to_skip.to_ulong();
-    }
     
-    std::bitset<CHAR_BIT> bits_with_padding{buffer.at(0)};
+    std::bitset<CHAR_BIT> bits_with_padding{bytes.at(0)};
     for (int i = CHAR_BIT - n_to_skip - 1; i >= 0; i--)
         line_bits.push_back(bits_with_padding[i]);
 
     for (int i = 1; i < last_idx; i ++) {
-        std::bitset<CHAR_BIT> bits{buffer.at(i)};
+        std::bitset<CHAR_BIT> bits{bytes.at(i)};
         for (int j = CHAR_BIT - 1; j >= 0; j--)
             line_bits.push_back(bits[j]);
     }
 
     line_decoded = decode(line_bits);
     output << line_decoded;
-    
-    if (output_newline)
-        output << '\n';
 
     input.close();
     output.close();
-}
-
-void tANS::ull_to_encoded(std::vector<bool> &message, ull line_chunk) {
-    std::vector<bool> message_chunk;
-    int n_bits = ((line_chunk == 0) ? 0 : std::log2(line_chunk)) + 1;
-
-    for (int i = 0; i < n_bits; i++, line_chunk >>= 1) {
-        message_chunk.push_back(line_chunk & 1);
-    }
-    int size_old = message.size();
-    auto it = message.begin();
-    std::insert_iterator<std::vector<bool>> insert(message, it);
-    std::copy(message_chunk.begin(), message_chunk.end(), insert);
 }

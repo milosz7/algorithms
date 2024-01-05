@@ -7,7 +7,7 @@ TAR_FNAME := Milosz_Bargiel_Zestaw01.tar.gz
 TO_COMPRESS := $(filter-out $(wildcard *.[o|x]), $(wildcard *))
 
 .PHONY: all clean tar
-all: Stack.x Generator.x ONP.x
+all: demo.x
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
@@ -15,7 +15,7 @@ all: Stack.x Generator.x ONP.x
 %.x: %.o
 	$(CXX) $(LDFLAGS) -o $@ $^
 
-main.x: tANS.hpp tANS.cpp
+demo.x: tANS.hpp tANS.cpp
 
 clean:
 	$(RM) $(wildcard *.[o|x])

@@ -12,6 +12,8 @@
 #include <regex>
 #include <iterator>
 #include <sstream>
+#include <climits>
+#include <bitset>
 
 class tANS {
     using Pair = std::pair<char, double>;

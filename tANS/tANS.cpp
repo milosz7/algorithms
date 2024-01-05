@@ -317,7 +317,7 @@ void tANS::encode_file(std::string filename_in, std::string filename_out) {
     std::vector<bool> message;
     std::vector<bool> line_encoded;
 
-    std::ofstream output{filename_out};
+    std::ofstream output{filename_out, std::ios::binary};
     input.open(filename_in);
 
     if (!output.is_open()) {
@@ -332,12 +332,7 @@ void tANS::encode_file(std::string filename_in, std::string filename_out) {
 
     while(input.peek() != EOF) {
         getline(input, line);
-
         line_encoded = encode(line);
-        auto it = message.begin();
-        std::advance(it, message.size());
-        std::insert_iterator<std::vector<bool>> insert(message, it);
-        std::copy(line_encoded.begin(), line_encoded.end(), insert);
         dump_line(line_encoded, output);
     }
 
@@ -346,36 +341,31 @@ void tANS::encode_file(std::string filename_in, std::string filename_out) {
 }
 
 void tANS::dump_line(std::vector<bool> &line, std::ofstream &output) {
-    int out_bits = 64;
-    constexpr int acc_threshold = 1;
-    std::vector<bool> chunk_vec;
-    ull encoded;
-    int current_size;
+    std::string message_str = "";
+    size_t n_padding = 0;
+    int message_len = line.size();
 
-    while ((current_size = line.size())) {
-        int bits_to_dump = min(out_bits, current_size);
-        // meaning zero should be the output
-        if (line.back() == 0)
-            bits_to_dump = 1;
-
-        chunk_vec.resize(bits_to_dump);
-
-        for (int i = 0; i < bits_to_dump; i++) {
-            chunk_vec.at(i) = line.back();
-            line.pop_back();
-        }
-
-        if (bits_to_dump > acc_threshold) {
-             encoded = std::accumulate(chunk_vec.begin(), chunk_vec.end(), (ull)0, 
-                        [](ull p, ull q)
-                        { return (p << 1) + q; }
-                      );
-        } else {
-            encoded = chunk_vec.at(0);
-        }
-        output << encoded << ((line.size()) ? " " : "\n");
-        chunk_vec.clear();
+    while (message_len % CHAR_BIT) {
+        message_str = message_str + "0";
+        n_padding++;
+        message_len += 1;
     }
+    std::bitset<CHAR_BIT> padding_bitset{n_padding};
+    for (int i = 0; i < line.size(); i++)
+        message_str += (line.at(i)) ? "1" : "0";
+    message_str += padding_bitset.to_string();
+
+    for (int i = 0; i != message_len; i += (CHAR_BIT)) {
+        std::bitset<CHAR_BIT> byte{message_str.substr(i, i + CHAR_BIT)};
+        unsigned long byte_l = byte.to_ulong();
+        unsigned char byte_ch = static_cast<unsigned char>(byte_l);
+        output << byte_ch;
+    }
+
+    unsigned long padding_l = padding_bitset.to_ulong();
+    unsigned char padding_ch = static_cast<unsigned char>(padding_l);
+    output << padding_ch;
+    // output << '\n';
 }
 
 int tANS::min(int a, int b) { return (a < b) ? a : b; }
@@ -385,9 +375,11 @@ void tANS::decode_file(std::string filename_in, std::string filename_out) {
     std::string line, line_decoded;
     std::vector<bool> line_bits;
     ull encoded;
+    bool output_newline;
 
     std::ofstream output{filename_out};
-    input.open(filename_in);
+    input.open(filename_in, std::ios::binary);
+    
 
     if (!output.is_open()) {
         std::cerr << "Error while opening output encode file!" << std::endl;
@@ -399,17 +391,42 @@ void tANS::decode_file(std::string filename_in, std::string filename_out) {
         exit(1);
     }
 
-    while (input.peek() != EOF) {
-        getline(input, line);
-        std::stringstream ss_line(line);
-
-        while (ss_line >> encoded)
-            ull_to_encoded(line_bits, encoded);
-        line_decoded = decode(line_bits);
-        output << line_decoded;
-        line_bits.clear();
-        output << "\n";
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(input), {});
+    int n_bytes = buffer.size();
+    int last_idx = n_bytes - 1;
+    for (int i = 0; i < n_bytes; i++) {
+        unsigned char h = buffer.at(i);
+        std::bitset<CHAR_BIT> bits{h};
     }
+
+    unsigned char last_byte = buffer.at(last_idx);
+    std::bitset<CHAR_BIT> bitset_last{last_byte};
+    size_t n_to_skip = bitset_last.to_ulong();
+    //meaning last character is a newline;
+    output_newline = (n_to_skip >= (CHAR_BIT - 1));
+
+    if (output_newline) {
+        last_idx--;
+        last_byte = buffer.at(last_idx);
+        std::bitset<CHAR_BIT> bitset_to_skip{last_byte};
+        n_to_skip = bitset_to_skip.to_ulong();
+    }
+    
+    std::bitset<CHAR_BIT> bits_with_padding{buffer.at(0)};
+    for (int i = CHAR_BIT - n_to_skip - 1; i >= 0; i--)
+        line_bits.push_back(bits_with_padding[i]);
+
+    for (int i = 1; i < last_idx; i ++) {
+        std::bitset<CHAR_BIT> bits{buffer.at(i)};
+        for (int j = CHAR_BIT - 1; j >= 0; j--)
+            line_bits.push_back(bits[j]);
+    }
+
+    line_decoded = decode(line_bits);
+    output << line_decoded;
+    
+    if (output_newline)
+        output << '\n';
 
     input.close();
     output.close();

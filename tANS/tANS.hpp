@@ -23,6 +23,8 @@ class tANS {
             char symbol;
             int nb_bits;
             int new_x;
+            DecodingNode(char symbol_, int nb_bits_, int new_x_) 
+                : symbol{symbol_}, nb_bits{nb_bits_}, new_x{new_x_} {}
         };
 
         ~tANS();

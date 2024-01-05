@@ -199,13 +199,11 @@ void tANS::generate_decoding_table() {
     decoding_table.resize(L);
     
     for (int x = 0; x < L; x++) {
-        DecodingNode* t = new DecodingNode;
         char symbol = symbols[x];
         int n = next[symbol]++;
         int nb_bits = R - floor(log2(n));
-        t->symbol = symbol;
-        t->nb_bits = nb_bits;
-        t->new_x = (n << nb_bits) - L;
+        int new_x = (n << nb_bits) - L;
+        DecodingNode* t = new DecodingNode(symbol, nb_bits, new_x);
         decoding_table[x] = t;   
     }
 }
@@ -353,7 +351,7 @@ void tANS::dump_line(std::vector<bool> &line, std::ofstream &output) {
         n_padding++;
         message_len += 1;
     }
-    
+
     std::bitset<CHAR_BIT> padding_bitset{n_padding};
     for (int i = 0; i < line.size(); i++)
         message_str += (line.at(i)) ? "1" : "0";

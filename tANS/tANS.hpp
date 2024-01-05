@@ -62,6 +62,7 @@ class tANS {
         int update_decoding_state(std::vector<bool> &message, int nb_bits, int x_old);
         void create_tables();
         void dump_line(std::vector<bool> &line, std::ofstream &output);
+        int bits_to_int(std::vector<bool> &bits);
 };
 
 #endif

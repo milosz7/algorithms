@@ -258,10 +258,7 @@ int tANS::read_decoding_state(std::vector<bool> &message) {
         message.pop_back();
     }
 
-    int x_start = std::accumulate(state_vec.begin(), state_vec.end(), 0, 
-                   [](int p, int q) 
-                   { return (p << 1) + q; }
-                  );
+    int x_start = bits_to_int(state_vec);
     return x_start;
 }
 
@@ -276,10 +273,7 @@ int tANS::update_decoding_state(std::vector<bool> &message, int nb_bits, int new
     }
 
     if (state_vec.size() > acc_threshold) {
-        x_add = std::accumulate(state_vec.begin(), state_vec.end(), 0, 
-                    [](int p, int q)
-                    { return (p << 1) + q; }
-                  );
+        x_add = bits_to_int(state_vec);
     } else {
         x_add = state_vec.at(0);
     }
@@ -351,7 +345,7 @@ void tANS::dump_line(std::vector<bool> &line, std::ofstream &output) {
     int message_len = line.size();
 
     while (message_len % CHAR_BIT) {
-        message_str = message_str + "0";
+        message_str.push_back('0');
         n_padding++;
         message_len += 1;
     }
@@ -420,4 +414,11 @@ void tANS::decode_file(std::string filename_in, std::string filename_out) {
 
     input.close();
     output.close();
+}
+
+int tANS::bits_to_int(std::vector<bool> &bits) {
+    return std::accumulate(bits.begin(), bits.end(), 0,
+                [](int p, int q)
+                { return (p << 1) + q; }
+            );
 }

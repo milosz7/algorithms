@@ -54,8 +54,8 @@ void Dict<K, V>::clear() {
 
 template <class K, class V>
 bool Dict<K, V>::insert(const Pair& pair) {
-    K key = pair.first();
-    V value = pair.second();
+    K key = pair.first;
+    V value = pair.second;
     int idx = hash(code(key), n_buckets);
     if (buckets_[idx]->find(key) != KEY_NOT_FOUND) {
         size_++;

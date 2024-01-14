@@ -42,6 +42,7 @@ template <class K, class V>
 Dict<K, V>::~Dict() {
     for (int i = 0; i < n_buckets; i++)
         delete buckets_[i];
+    delete buckets_;
 }
 
 
@@ -57,7 +58,7 @@ bool Dict<K, V>::insert(const Pair& pair) {
     K key = pair.first;
     V value = pair.second;
     int idx = hash(code(key), n_buckets);
-    if (buckets_[idx]->find(key) != KEY_NOT_FOUND) {
+    if (buckets_[idx]->find(key) == KEY_NOT_FOUND) {
         size_++;
         buckets_[idx]->push_front(pair);
         return true;

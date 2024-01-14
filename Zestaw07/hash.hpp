@@ -41,17 +41,9 @@ unsigned code(const double key) {
 }
 
 size_t hash(unsigned code, int n_buckets) {
-    // prime number bigger than number of buckets
-    // it is safe to choose int max as its equal to max number
-    // of buckets possible
     int p = INT32_MAX;
-    // randomly chosen integers - could be further improved by randomly assigning a and b programmaticaly
-    // a from range [1, p-1]
-    // b from range [0, p-1]
-    int a = 86847;
-    int b = 1237951;
     size_t hash;
-    hash = (a * code + b) % p % n_buckets; 
+    hash = code % p % n_buckets; 
     return hash;
 }
 

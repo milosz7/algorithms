@@ -63,7 +63,7 @@ void LinkedList<K, V>::push_front(Pair &x) {
 template <class K, class V>
 void LinkedList<K, V>::clear() {
     Node *to_remove = indirect->next;
-    while (to_remove != indirect) {
+    while (to_remove != nullptr) {
         Node *temp = to_remove->next;
         delete to_remove;
         to_remove = temp;
@@ -76,7 +76,7 @@ template <class K, class V>
 int LinkedList<K, V>::find(K x) {
     Node *walk = indirect->next;
     int index = 0;
-    while (walk != indirect) {
+    while (walk != nullptr) {
         if (walk->value->first == x)
             return index;
         index++;

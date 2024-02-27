@@ -5,3 +5,5 @@
 /**/*.txt
 /**/*.jpg
 .DS_Store
+/**/*.bin
+/**/*.out

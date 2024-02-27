@@ -41,10 +41,7 @@ template <class K, class V>
 int LinkedList<K, V>::size() { return _size; }
 
 template <class K, class V>
-LinkedList<K, V>::LinkedList() {
-    indirect = new Node();
-    indirect->next = indirect;
-}
+LinkedList<K, V>::LinkedList() { indirect = new Node(); }
 
 template <class K, class V>
 LinkedList<K, V>::~LinkedList() {
@@ -69,7 +66,7 @@ void LinkedList<K, V>::clear() {
         to_remove = temp;
     }
     _size = 0;
-    indirect->next = indirect;
+    indirect->next = nullptr;
 }
 
 template <class K, class V>
@@ -89,7 +86,7 @@ int LinkedList<K, V>::find(K x) {
 
 template <class K, class V>
 bool LinkedList<K, V>::erase(K k) {
-    Node *walk = indirect->next;
+    Node *walk = indirect;
     while (walk->next != nullptr) {
         if (walk->next->value->first == k) {
             Node *temp = walk->next;

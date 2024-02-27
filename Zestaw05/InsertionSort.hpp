@@ -9,10 +9,10 @@ void sort(std::vector<T> &v) {
         T value = v.at(i);
         int j = i - 1;
         while (j >= 0 && v.at(j) > value) {
-            std::swap(v.at(j+1), v.at(j));
+            v[j+1] = v[j];
             j--;
         }
-        v.at(j+1) = value;
+        v[j+1] = value;
     }
 }
 

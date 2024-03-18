@@ -7,8 +7,13 @@ setArr::~setArr() { delete table; }
 void setArr::insert(int x) { 
     if (!checkRangeCorrectness(x))
         throw std::out_of_range("Index out of bounds!");
-    table[x] = true; 
-    size++;
+    if (!isInSet(x)) {
+        table[x] = true; 
+        size++;
+    } else {
+        std::cerr << "Element: " << x << " already in the set." << std::endl;
+    }
+    
 }
 
 void setArr::withdraw(int x) {

@@ -1,6 +1,3 @@
-from Edge import Edge
-
-
 class MatrixGraph:
     def __init__(self, vertices):
         self.vertices = vertices

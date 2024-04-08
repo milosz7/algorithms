@@ -1,4 +1,4 @@
-from MatrixGraph import MatrixGraph
+from graph.MatrixGraph import MatrixGraph
 from priority_queue.PriorityQueue import PriorityQueue
 import math
 

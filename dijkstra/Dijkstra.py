@@ -1,5 +1,5 @@
 from MatrixGraph import MatrixGraph
-from PriorityQueue import PriorityQueue
+from priority_queue.PriorityQueue import PriorityQueue
 import math
 
 

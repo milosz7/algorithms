@@ -6,7 +6,8 @@ class MatrixGraph:
     def add_edge(self, u, v, weight=1):
         if not self.check_boundaries(u,v):
             raise IndexError(f'Invalid vertex for size {self.vertices}')
-        self.graph[u][v] = weight
+        if self.has_edge(u, v) and weight < self.graph[u][v] or not self.has_edge(u, v):
+            self.graph[u][v] = weight
 
     def remove_edge(self, u, v):
         if not self.check_boundaries(u,v):
@@ -50,12 +51,19 @@ class MatrixGraph:
         return graph
 
     def get_neighbours(self, u):
+        '''
+        :param u: vertex of which neighbors' should be returned
+        :return: List of tuples in format (vertex, weight)
+        '''
         return sorted([(v, self.graph[u][v]) for v in range(self.vertices) if self.graph[u][v]])
 
     def check_boundaries(self, u, v):
         return 0 <= u < self.vertices and 0 <= v < self.vertices
 
     def get_vertices_in_graph(self):
+        '''
+        :return: List of graph vertices that have at least one edge
+        '''
         froms = {n for n, sub_row in enumerate(self.graph) for vertex in sub_row if vertex}
         tos = {n for sub_row in self.graph for n, vertex in enumerate(sub_row) if vertex}
         return froms.union(tos)

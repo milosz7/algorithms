@@ -7,7 +7,7 @@ class Kruskal:
         self.graph = MatrixGraph.read_from_file(graph_filename, weighted=True)
         self.vertices = self.graph.get_vertices_in_graph()
         self.are_connected = [i for i in range(self.graph.get_vertices())]
-        self.mst = set()
+        self.mst = []
         self.queue = PriorityQueue()
 
     def populate_queue(self):
@@ -30,7 +30,7 @@ class Kruskal:
                     if self.are_connected[i] == max_conn:
                         self.are_connected[i] = min_conn
 
-                self.mst.add(((vertex_from, vertex_to), weight))
+                self.mst.append(((vertex_from, vertex_to), weight))
 
     def sum_weights(self):
         return sum([weight for _, weight in self.mst])

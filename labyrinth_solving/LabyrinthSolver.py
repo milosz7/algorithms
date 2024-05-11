@@ -1,9 +1,10 @@
 import random
+from priority_queue.PriorityQueue import PriorityQueue
 
 
 class LabyrinthSolver:
     def __init__(self, labyrinth, method="bfs"):
-        methods = ("bfs", "dfs")
+        methods = ("bfs", "dfs", "greedy")
         if method not in methods:
             raise ValueError(f"Method: {method} is not a valid method, available methods: {', '.join(methods)}.")
 
@@ -40,6 +41,8 @@ class LabyrinthSolver:
     def run(self):
         if self.method == "dfs" or self.method == "bfs":
             return self.dfs_bfs_routine()
+        if self.method == "greedy":
+            return self.greedy_routine()
 
     def get_path(self, precedents, end_cell):
         path = []
@@ -49,3 +52,33 @@ class LabyrinthSolver:
             current = precedents[current]
 
         return path
+
+    def manhattan_distances(self):
+        distances = [[0 for _ in range(self.labyrinth.end_x + 1)] for _ in range(self.labyrinth.end_y + 1)]
+        for i, row in enumerate(self.labyrinth.graph):
+            for j, cell in enumerate(row):
+                distances[i][j] = abs(i - self.labyrinth.end_cell[0]) + abs(j - self.labyrinth.end_cell[1])
+        return distances
+
+    def greedy_routine(self):
+        queue = PriorityQueue()
+        queue.push(self.start, 0)
+        visited = set()
+        precedents = dict()
+        distances = self.manhattan_distances()
+
+        while not queue.is_empty():
+            current, _ = queue.pop()
+            visited.add(current)
+            if current == self.labyrinth.end_cell:
+                return precedents, current
+
+            neighbors = self.labyrinth.get_neighbours(*current)
+            random.shuffle(neighbors)
+
+            for neighbor in neighbors:
+                if neighbor not in visited:
+                    precedents[neighbor] = current
+                    queue.push(neighbor, distances[neighbor[0]][neighbor[1]])
+
+        raise Exception("Unable to solve the maze!")

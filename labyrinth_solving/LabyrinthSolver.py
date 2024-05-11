@@ -4,7 +4,7 @@ from priority_queue.PriorityQueue import PriorityQueue
 
 class LabyrinthSolver:
     def __init__(self, labyrinth, method="bfs"):
-        methods = ("bfs", "dfs", "greedy")
+        methods = ("bfs", "dfs", "greedy", "a_star")
         if method not in methods:
             raise ValueError(f"Method: {method} is not a valid method, available methods: {', '.join(methods)}.")
 
@@ -25,24 +25,35 @@ class LabyrinthSolver:
                 # stack
                 current = stack.pop()
 
+            if current == self.labyrinth.end_cell:
+                return precedents, current, visited
+
             visited.add(current)
             neighbors = self.labyrinth.get_neighbours(*current)
-            random.shuffle(neighbors)
+            if self.method == "dfs":
+                random.shuffle(neighbors)
 
             for neighbor in neighbors:
                 if neighbor not in visited:
                     precedents[neighbor] = current
                     stack.append(neighbor)
-                    if self.labyrinth.get_cell(*neighbor) == self.labyrinth.end_value:
-                        return precedents, neighbor
 
         raise Exception("Unable to solve the maze!")
 
-    def run(self):
+    def run(self, return_visited=False):
+        # check of correctness of method is done in the constructor,
+        # therefore the function always returns some value
         if self.method == "dfs" or self.method == "bfs":
-            return self.dfs_bfs_routine()
+           precedents, end, visited = self.dfs_bfs_routine()
         if self.method == "greedy":
-            return self.greedy_routine()
+            precedents, end, visited = self.greedy_routine()
+        if self.method == "a_star":
+            precedents, end, visited = self.a_star_routine()
+        if return_visited:
+            # noinspection PyUnboundLocalVariable
+            return precedents, end, visited
+        # noinspection PyUnboundLocalVariable
+        return precedents, end
 
     def get_path(self, precedents, end_cell):
         path = []
@@ -71,14 +82,45 @@ class LabyrinthSolver:
             current, _ = queue.pop()
             visited.add(current)
             if current == self.labyrinth.end_cell:
-                return precedents, current
+                return precedents, current, visited
 
             neighbors = self.labyrinth.get_neighbours(*current)
-            random.shuffle(neighbors)
+            # random.shuffle(neighbors)
 
             for neighbor in neighbors:
                 if neighbor not in visited:
                     precedents[neighbor] = current
                     queue.push(neighbor, distances[neighbor[0]][neighbor[1]])
+
+        raise Exception("Unable to solve the maze!")
+
+    def get_current_path_len(self, precedents, current):
+        path = []
+        while current != self.start:
+            path.append(current)
+            current = precedents[current]
+        return len(path)
+
+    def a_star_routine(self):
+        queue = PriorityQueue()
+        queue.push(self.start, 0)
+        visited = set()
+        precedents = dict()
+        distances = self.manhattan_distances()
+
+        while not queue.is_empty():
+            current, _ = queue.pop()
+            visited.add(current)
+            if current == self.labyrinth.end_cell:
+                return precedents, current, visited
+
+            neighbors = self.labyrinth.get_neighbours(*current)
+            # random.shuffle(neighbors)
+
+            for neighbor in neighbors:
+                if neighbor not in visited:
+                    precedents[neighbor] = current
+                    weight = self.get_current_path_len(precedents, current) + distances[neighbor[0]][neighbor[1]]
+                    queue.push(neighbor, weight)
 
         raise Exception("Unable to solve the maze!")

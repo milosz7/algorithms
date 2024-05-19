@@ -44,7 +44,7 @@ class LabyrinthSolver:
         # check of correctness of method is done in the constructor,
         # therefore the function always returns some value
         if self.method == "dfs" or self.method == "bfs":
-           precedents, end, visited = self.dfs_bfs_routine()
+            precedents, end, visited = self.dfs_bfs_routine()
         if self.method == "greedy":
             precedents, end, visited = self.greedy_routine()
         if self.method == "a_star":

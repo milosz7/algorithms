@@ -16,15 +16,16 @@ class LabyrinthGenerator:
         stack = [current]
 
         while stack:
-            current = stack.pop()
+            current = stack[-1]
             neighbors = self.get_neighbors(current)
+            neighbors = [neighbor for neighbor in neighbors if not self.visited[neighbor.y][neighbor.x]]
             if neighbors:
-                random.shuffle(neighbors)
-                for neighbor in neighbors:
-                    if not self.visited[neighbor.y][neighbor.x]:
-                        current.remove_wall(neighbor)
-                        self.visited[neighbor.y][neighbor.x] = True
-                        stack.append(neighbor)
+                neighbor = random.choice(neighbors)
+                current.remove_wall(neighbor)
+                self.visited[neighbor.y][neighbor.x] = True
+                stack.append(neighbor)
+            else:
+                stack.pop()
 
     def get_neighbors(self, cell):
         neighbors = []
@@ -39,7 +40,7 @@ class LabyrinthGenerator:
             neighbors.append(self.labyrinth[y + 1][x])
         return neighbors
 
-    def draw_labyrinth(self):
+    def draw_labyrinth_image(self):
         cell_size = 50
         b_width = 2
         img = Image.new('RGB', (self.width * cell_size + 2, self.height * cell_size + 2), color='white')
@@ -66,3 +67,8 @@ class LabyrinthGenerator:
                 if cell.right_wall:
                     draw.line([(x1, y0), (x1, y1)], fill='black', width=b_width)
         img.show()
+
+if __name__ == "__main__":
+    generator = LabyrinthGenerator(10, 10)
+    generator.generate()
+    generator.draw_labyrinth_image()

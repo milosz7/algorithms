@@ -10,7 +10,7 @@ class LabyrinthGenerator:
         self.labyrinth = [[Cell(x, y) for x in range(width)] for y in range(height)]
         self.visited = [[False for _ in range(width)] for _ in range(height)]
 
-    def generate(self):
+    def generate(self, steps=False):
         current = self.labyrinth[0][0]
         self.visited[current.y][current.x] = True
         stack = [current]
@@ -22,6 +22,8 @@ class LabyrinthGenerator:
             if neighbors:
                 neighbor = random.choice(neighbors)
                 current.remove_wall(neighbor)
+                if steps:
+                    yield self.labyrinth
                 self.visited[neighbor.y][neighbor.x] = True
                 stack.append(neighbor)
             else:
@@ -68,7 +70,3 @@ class LabyrinthGenerator:
                     draw.line([(x1, y0), (x1, y1)], fill='black', width=b_width)
         img.show()
 
-if __name__ == "__main__":
-    generator = LabyrinthGenerator(10, 10)
-    generator.generate()
-    generator.draw_labyrinth_image()

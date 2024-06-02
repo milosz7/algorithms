@@ -15,9 +15,10 @@ class TopologicalSort:
     def sort(self):
         result = []
         vertices = self.graph.get_vertices()
+        in_degrees = []
         for vertex in range(vertices):
-            n_edges = len(self.graph.get_edges_to(vertex))
-            if n_edges == 0:
+            in_degrees.append(len(self.graph.get_edges_to(vertex)))
+            if in_degrees[vertex] == 0:
                 self.queue.append(vertex)
 
         while self.queue:
@@ -25,11 +26,11 @@ class TopologicalSort:
             result.append(popped)
             edges_from_popped = self.graph.get_neighbours(popped)
             for to, _ in edges_from_popped:
-                self.graph.remove_edge(popped, to)
-                if len(self.graph.get_edges_to(to)) == 0:
+                in_degrees[to] -= 1
+                if in_degrees[to] == 0:
                     self.queue.append(to)
 
-        if self.graph.count_edges():
+        if len(result) != vertices:
             return "ERROR - cycle detected"
         else:
             return result

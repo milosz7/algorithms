@@ -5,7 +5,7 @@ from graph.MatrixGraph import MatrixGraph
 
 class TestTopologicalSort(unittest.TestCase):
     def setUp(self):
-        self.graph = MatrixGraph(7)
+        self.graph = MatrixGraph(5)
         self.graph.add_edge(0, 1)
         self.graph.add_edge(1, 2)
         self.graph.add_edge(2, 3)
